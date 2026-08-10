@@ -3,33 +3,63 @@ import java.util.Scanner;
 public class Calculator {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+        boolean continueCalc = true;
 
-        System.out.print("첫 번째 숫자: ");
-        double firstNumber = scanner.nextDouble();
+        String[] history = new String[100];
+        int historyCount = 0;
 
-        System.out.print("연산자(+ - * /): ");
-        String operator = scanner.next();
+        while (continueCalc) {
+            System.out.print("첫 번째 숫자: ");
+            double firstNumber = scanner.nextDouble();
 
-        System.out.print("두 번째 숫자: ");
-        double secondNumber = scanner.nextDouble();
+            System.out.print("연산자(+ - * /): ");
+            String operator = scanner.next();
 
-        if (operator.equals("/") && secondNumber == 0) {
-            System.out.println("0으로 나눌 수 없습니다.");
-            scanner.close();
-            return;
+            System.out.print("두 번째 숫자: ");
+            double secondNumber = scanner.nextDouble();
+
+            // 0으로 나누기 예외 처리
+            try {
+                if (operator.equals("/") && secondNumber == 0) {
+                    throw new ArithmeticException("0으로 나눌 수 없습니다.");
+                }
+
+                // switch expression을 사용하여 계산
+                double result = switch (operator) {
+                    case "+" -> firstNumber + secondNumber;
+                    case "-" -> firstNumber - secondNumber;
+                    case "*" -> firstNumber * secondNumber;
+                    case "/" -> firstNumber / secondNumber;
+                    default -> Double.NaN;
+                };
+
+                System.out.println("결과: " + result);
+
+                // 계산 기록을 history 배열에 저장
+                history[historyCount] = firstNumber + " " + operator + " " + secondNumber + " = " + result;
+                historyCount++;
+
+            } catch (ArithmeticException e) {
+                System.out.println("예외 발생: " + e.getMessage());
+            }
+
+            System.out.print("계속하려면 c, 종료하려면 q: ");
+            String choice = scanner.next();
+
+            if (choice.equals("q")) {
+                continueCalc = false;
+            }
         }
 
-        // switch expression을 사용하여 계산
-        double result = switch (operator) {
-            case "+" -> firstNumber + secondNumber;
-            case "-" -> firstNumber - secondNumber;
-            case "*" -> firstNumber * secondNumber;
-            case "/" -> firstNumber / secondNumber;
-            default -> Double.NaN; // 잘못된 경우 NaN 반환
-        };
+        // 계산 기록을 for-each로 출력
+        System.out.println("=== 계산 기록 ===");
+        for (String record : history) {
+            if (record != null) {
+                System.out.println(record);
+            }
+        }
 
-        System.out.println("결과: " + result);
-
+        System.out.println("계산기를 종료합니다.");
         scanner.close();
     }
 }
