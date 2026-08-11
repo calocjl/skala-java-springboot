@@ -1,12 +1,16 @@
 import java.util.Scanner;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class Calculator {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         boolean continueCalc = true;
 
-        String[] history = new String[100];
-        int historyCount = 0;
+        // 변경 전: List<String> history = new ArrayList<>();
+        // 변경 후:
+        Map<Integer, String> historyMap = new HashMap<>();
 
         while (continueCalc) {
             System.out.print("첫 번째 숫자: ");
@@ -18,13 +22,11 @@ public class Calculator {
             System.out.print("두 번째 숫자: ");
             double secondNumber = scanner.nextDouble();
 
-            // 0으로 나누기 예외 처리
             try {
                 if (operator.equals("/") && secondNumber == 0) {
                     throw new ArithmeticException("0으로 나눌 수 없습니다.");
                 }
 
-                // switch expression을 사용하여 계산
                 double result = switch (operator) {
                     case "+" -> firstNumber + secondNumber;
                     case "-" -> firstNumber - secondNumber;
@@ -35,9 +37,11 @@ public class Calculator {
 
                 System.out.println("결과: " + result);
 
-                // 계산 기록을 history 배열에 저장
-                history[historyCount] = firstNumber + " " + operator + " " + secondNumber + " = " + result;
-                historyCount++;
+                String record = firstNumber + " " + operator + " " + secondNumber + " = " + result;
+
+                // 변경 전: history.add(record);
+                // 변경 후: Key는 문자열의 hashCode(), Value는 기록 문자열
+                historyMap.put(record.hashCode(), record);
 
             } catch (ArithmeticException e) {
                 System.out.println("예외 발생: " + e.getMessage());
@@ -51,12 +55,13 @@ public class Calculator {
             }
         }
 
-        // 계산 기록을 for-each로 출력
-        System.out.println("=== 계산 기록 ===");
-        for (String record : history) {
-            if (record != null) {
-                System.out.println(record);
-            }
+        // 변경 전: Iterator<String>로 List 순회
+        // 변경 후: Map.Entry를 Iterator로 순회
+        System.out.println("\n=== 계산 기록 ===");
+        Iterator<Map.Entry<Integer, String>> iterator = historyMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Integer, String> entry = iterator.next();
+            System.out.println(entry.getKey() + ": " + entry.getValue());
         }
 
         System.out.println("계산기를 종료합니다.");
