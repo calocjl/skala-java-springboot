@@ -1,57 +1,48 @@
 package com.sk.skala.myapp.controller;
 
 import com.sk.skala.myapp.domain.User;
+import com.sk.skala.myapp.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api")
 public class UserController {
-    private List<User> users = new ArrayList<>(List.of(
-        new User(1L, "alice", "alice@example.com"),
-        new User(2L, "bob", "bob@example.com"),
-        new User(3L, "charlie", "charlie@example.com")
-    ));
-    private long userIdCounter = 4;
 
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    // 모든 사용자 조회
     @GetMapping("/users")
     public List<User> getAllUsers() {
-        return users;
+        return userService.getAllUsers();
     }
 
+    // GET: 특정 사용자 가져오기
     @GetMapping("/users/{id}")
-    public User getUserById(@PathVariable long id) {
-        for (User user : users) {
-            if (user.getId() == id) {
-                return user;
-            }
-        }
-        return null;
+    public User getUserById(@PathVariable Long id) {
+        return userService.getUserById(id).orElse(null);
     }
 
+    // POST: 사용자 추가
     @PostMapping("/users")
     public User createUser(@RequestBody User user) {
-        user.setId(userIdCounter++);
-        users.add(user);
-        return user;
+        return userService.createUser(user);
     }
 
+    // DELETE: 사용자 삭제
     @DeleteMapping("/users/{id}")
-    public void deleteUser(@PathVariable long id) {
-        users.removeIf(user -> user.getId() == id);
+    public void deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
     }
 
+    // PUT: 사용자 정보 수정
     @PutMapping("/users/{id}")
     public User updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
-        for (User user : users) {
-            if (user.getId() == id) {
-                user.setName(updatedUser.getName());
-                user.setEmail(updatedUser.getEmail());
-                return user;
-            }
-        }
-        return null;
+        return userService.updateUser(id, updatedUser).orElse(null);
     }
 }
